@@ -4,7 +4,7 @@ import { SearchContext } from '../../App';
 import debounce from 'lodash.debounce';
 
 const Search = () => {
-  const { searchValue, setSearchValue } = useContext(SearchContext);
+  const { setSearchValue } = useContext(SearchContext);
   const [value, setValue] = useState('');
 
   const inputRef = useRef(null);
