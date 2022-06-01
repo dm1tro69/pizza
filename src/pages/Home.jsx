@@ -10,16 +10,18 @@ import { setCategoryId, setFilters, setPageCount } from '../redux/slices/filterS
 import axios from 'axios';
 import qs from 'qs';
 import { useNavigate } from 'react-router-dom';
+import { fetchPizzas, setItems } from '../redux/slices/pizzaSlice';
 
 const Home = () => {
-  const [pizzas, setPizzas] = useState([]);
+  // const [pizzas, setPizzas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isMounted = useRef(false);
+  // const isMounted = useRef(false);
 
   const dispatch = useDispatch();
   const categoryId = useSelector((state) => state.filter.categoryId);
   const currentPage = useSelector((state) => state.filter.pageCount);
+  const itemsPizzas = useSelector((state) => state.pizza.items);
 
   const sort = useSelector((state) => state.filter.sort.sortProperty);
 
@@ -36,14 +38,20 @@ const Home = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    axios
-      .get(
-        `https://628cde00a3fd714fd03af787.mockapi.io/items?page=${currentPage}&limit=4&${catId}&sortBy=${sort}${search}`,
-      )
-      .then((res) => {
-        setPizzas(res.data);
+    const getPizzas = async () => {
+      try {
+        // const response = await axios.get(
+        //   `https://628cde00a3fd714fd03af787.mockapi.io/items?page=${currentPage}&limit=4&${catId}&sortBy=${sort}${search}`,
+        // );
+        // const data = await response.data;
+        dispatch(fetchPizzas({ sort, currentPage, search, catId }));
         setIsLoading(false);
-      });
+      } catch (e) {
+        console.log(e);
+        setIsLoading(false);
+      }
+    };
+    getPizzas();
 
     window.scroll(0, 0);
   }, [categoryId, sort, searchValue, currentPage]);
@@ -54,7 +62,7 @@ const Home = () => {
     navigate(`/?${queryString}`);
   }, [categoryId, sort, searchValue, currentPage]);
 
-  const items = pizzas.map((pizza) => <PizzaBlock key={pizza.id} {...pizza} />);
+  const items = itemsPizzas.map((pizza) => <PizzaBlock key={pizza.id} {...pizza} />);
   const skeletons = [...new Array(6)].map((_, i) => <Skeleton key={i} />);
 
   // useEffect(() => {
