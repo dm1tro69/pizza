@@ -1,22 +1,17 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Categories from '../components/Categories';
-import Sort, { sortList } from '../components/Sort';
+import Sort from '../components/Sort';
 import Skeleton from '../components/pizzaBlock/Skeleton';
 import PizzaBlock from '../components/PizzaBlock';
 import Pagination from '../Pagination';
-import { SearchContext } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCategoryId, setFilters, setPageCount } from '../redux/slices/filterSlice';
-import axios from 'axios';
+import { setCategoryId, setPageCount } from '../redux/slices/filterSlice';
 import qs from 'qs';
-import { useNavigate } from 'react-router-dom';
-import { fetchPizzas, setItems } from '../redux/slices/pizzaSlice';
+import { Link, useNavigate } from 'react-router-dom';
+import { fetchPizzas } from '../redux/slices/pizzaSlice';
 
 const Home = () => {
-  // const [pizzas, setPizzas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // const isMounted = useRef(false);
 
   const dispatch = useDispatch();
   const categoryId = useSelector((state) => state.filter.categoryId);
@@ -25,7 +20,7 @@ const Home = () => {
 
   const sort = useSelector((state) => state.filter.sort.sortProperty);
 
-  const { searchValue } = useContext(SearchContext);
+  const { searchValue } = useSelector((state) => state.filter);
 
   const search = searchValue ? `search=${searchValue}` : '';
   const catId = categoryId > 0 ? `category=${categoryId}` : '';
@@ -40,10 +35,6 @@ const Home = () => {
     setIsLoading(true);
     const getPizzas = async () => {
       try {
-        // const response = await axios.get(
-        //   `https://628cde00a3fd714fd03af787.mockapi.io/items?page=${currentPage}&limit=4&${catId}&sortBy=${sort}${search}`,
-        // );
-        // const data = await response.data;
         dispatch(fetchPizzas({ sort, currentPage, search, catId }));
         setIsLoading(false);
       } catch (e) {
@@ -62,13 +53,12 @@ const Home = () => {
     navigate(`/?${queryString}`);
   }, [categoryId, sort, searchValue, currentPage]);
 
-  const items = itemsPizzas.map((pizza) => <PizzaBlock key={pizza.id} {...pizza} />);
+  const items = itemsPizzas.map((pizza) => (
+    <Link key={pizza.id} to={`/pizza/${pizza.id}`}>
+      <PizzaBlock {...pizza} />
+    </Link>
+  ));
   const skeletons = [...new Array(6)].map((_, i) => <Skeleton key={i} />);
-
-  // useEffect(() => {
-  //   // const category = sortList;
-  //   // dispatch(setFilters(qs.parse(window.location.search.substring(1))));
-  // }, []);
 
   return (
     <div className={'container'}>
