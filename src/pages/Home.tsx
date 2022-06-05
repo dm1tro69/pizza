@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Categories from '../components/Categories';
 import Sort from '../components/Sort';
 import Skeleton from '../components/pizzaBlock/Skeleton';
@@ -7,27 +7,28 @@ import Pagination from '../Pagination';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCategoryId, setPageCount } from '../redux/slices/filterSlice';
 import qs from 'qs';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { fetchPizzas } from '../redux/slices/pizzaSlice';
+import { RootState } from '../redux/store';
 
-const Home = () => {
+const Home: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const dispatch = useDispatch();
-  const categoryId = useSelector((state) => state.filter.categoryId);
-  const currentPage = useSelector((state) => state.filter.pageCount);
-  const itemsPizzas = useSelector((state) => state.pizza.items);
+  const categoryId = useSelector((state: RootState) => state.filter.categoryId);
+  const currentPage = useSelector((state: RootState) => state.filter.pageCount);
+  const itemsPizzas = useSelector((state: RootState) => state.pizza.items);
 
-  const sort = useSelector((state) => state.filter.sort.sortProperty);
+  const sort = useSelector((state: RootState) => state.filter.sort.sortProperty);
 
-  const { searchValue } = useSelector((state) => state.filter);
+  const { searchValue } = useSelector((state: RootState) => state.filter);
 
   const search = searchValue ? `search=${searchValue}` : '';
   const catId = categoryId > 0 ? `category=${categoryId}` : '';
 
   const navigate = useNavigate();
 
-  const onClickCategory = (id) => {
+  const onClickCategory = (id: number) => {
     dispatch(setCategoryId(id));
   };
 
@@ -35,6 +36,7 @@ const Home = () => {
     setIsLoading(true);
     const getPizzas = async () => {
       try {
+        // @ts-ignore
         dispatch(fetchPizzas({ sort, currentPage, search, catId }));
         setIsLoading(false);
       } catch (e) {
@@ -47,17 +49,13 @@ const Home = () => {
     window.scroll(0, 0);
   }, [categoryId, sort, searchValue, currentPage]);
 
-  useEffect(() => {
-    const params = { categoryId: categoryId > 0 ? categoryId : null, sort, currentPage };
-    const queryString = qs.stringify(params, { skipNulls: true });
-    navigate(`/?${queryString}`);
-  }, [categoryId, sort, searchValue, currentPage]);
+  // useEffect(() => {
+  //   const params = { categoryId: categoryId > 0 ? categoryId : null, sort, currentPage };
+  //   const queryString = qs.stringify(params, { skipNulls: true });
+  //   navigate(`/?${queryString}`);
+  // }, [categoryId, sort, searchValue, currentPage]);
 
-  const items = itemsPizzas.map((pizza) => (
-    <Link key={pizza.id} to={`/pizza/${pizza.id}`}>
-      <PizzaBlock {...pizza} />
-    </Link>
-  ));
+  const items = itemsPizzas.map((pizza: any) => <PizzaBlock key={pizza.id} {...pizza} />);
   const skeletons = [...new Array(6)].map((_, i) => <Skeleton key={i} />);
 
   return (
